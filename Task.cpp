@@ -1,100 +1,88 @@
-#include<iostream>
-#include<string>
-#include<vector>
+#include <bits/stdc++.h>
+#include "ExcelFormat.h" // Include the ExcelFormat library
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
-
-struct Task{
-
+struct Task {
     string name;
     string description;
-    int deadline;
-
-    void disp(){
-        cout<<"Task Name:- "<<name<<endl;
-        cout<<"Description for the task:- "<<description<<endl;
-        cout<<"Deadline for the task(in hours):- "<<deadline<<endl;
-    }
-
+    chrono::time_point<chrono::system_clock> deadline; // Change type to time_point
 };
 
-class taskmanager{
-
-    private:
-
+class TaskManager {
+private:
     vector<Task> list;
 
-    public:
+public:
+    TaskManager() {}
 
-    taskmanager() { 
-
+    void addTask(const string& name, const string& description, const chrono::time_point<chrono::system_clock>& deadline) {
+        Task task{name, description, deadline};
+        list.push_back(task);
     }
 
-    void addTask(string& name,string description, int deadline){
-        Task task;
-        task.name=name;
-        task.description=description;
-        task.deadline=deadline;
-        list.push_back({task.name,task.description,task.deadline});
+    void sortTasksByDeadline() {
+        sort(list.begin(), list.end(), [](const Task& a, const Task& b) {
+            return a.deadline < b.deadline;
+        });
     }
 
-    void reminder(int currenthour){
+    void saveToExcel(const string& filename) {
+        ExcelFormat::BasicExcel xls;
+        xls.New(1); // Create a new Excel file with 1 sheet
+        ExcelFormat::BasicExcelWorksheet* sheet = xls.GetWorksheet(0);
 
-        for(Task& task : list){
-            if(task.deadline<currenthour){
-                cout<<"Reminder: Your deadline for the task " <<task.name<<" is approaching soon. No. of hours left: "<<currenthour-task.deadline<<endl;
-                // cout<<"No. of hours left: "<<currenthour-task.deadline<<endl;
-            }
-            else{
-            cout<<"No. of hours for the task " <<task.name<<" left: "<<task.deadline-currenthour<<endl;
+        // Set column headers
+        sheet->Cell(0, 0)->SetString("Task Name");
+        sheet->Cell(0, 1)->SetString("Description");
+        sheet->Cell(0, 2)->SetString("Deadline");
+
+        // Write task data to Excel
+        for (size_t i = 0; i < list.size(); ++i) {
+            sheet->Cell(i + 1, 0)->SetString(list[i].name.c_str());
+            sheet->Cell(i + 1, 1)->SetString(list[i].description.c_str());
+            // Convert deadline to string for Excel
+            auto deadline_time_t = chrono::system_clock::to_time_t(list[i].deadline);
+            string deadline_str = ctime(&deadline_time_t);
+            sheet->Cell(i + 1, 2)->SetString(deadline_str.c_str());
         }
-        }
-    }
 
-    void show(){
-
-        for(Task& task : list){
-            task.disp();
-        
-        }
+        // Save the Excel file
+        xls.SaveAs(filename.c_str());
     }
-    
 };
 
-
-
-int main()
-{
-
-    taskmanager t1;
+int main() {
+    TaskManager taskManager;
     int n;
 
-    cout<<"Enter no of tasks you want to enter :-";
-    cin>>n;
+    cout << "Enter the number of tasks you want to enter: ";
+    cin >> n;
 
-    string name[n], description[n],a;
-    int deadline[n];
-    int currenthour;
-    currenthour=18;
+    string name, description;
+    int year, month, day, hour, minute;
 
-   
-    for(int i=0;i<n;i++){
+    for (int i = 0; i < n; ++i) {
+        cout << "Enter Task Name: ";
+        cin >> name;
+        cout << "Enter description for the task: ";
+        cin >> description;
+        cout << "Enter Deadline for the task (YYYY MM DD HH MM): ";
+        cin >> year >> month >> day >> hour >> minute;
 
+        // Construct deadline time_point
+        system_clock::time_point deadline = system_clock::from_time_t(0);
+        deadline += hours(hour) + minutes(minute);
 
-    cout<<"Enter Task Name:- ";
-    cin>>name[i];
-    cout<<"Enter description for the task:- ";
-    cin>>description[i];
-    cout<<"Enter Deadline for the task(in hours):- ";
-    cin>>deadline[i];
-
-    t1.addTask(name[i],description[i],deadline[i]);
+        taskManager.addTask(name, description, deadline);
     }
 
-    cout<<"Displaying Your Entries :-"<<endl;
-    t1.show();
-    t1.reminder(currenthour);
-    
+    taskManager.sortTasksByDeadline(); // Sort tasks by deadline
+    string filename = "tasks_sorted.xlsx"; // Change the filename if needed
+    taskManager.saveToExcel(filename);
+    cout << "Tasks saved to Excel file: " << filename << endl;
+
     return 0;
 }
