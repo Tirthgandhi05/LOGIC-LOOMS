@@ -1,6 +1,12 @@
-#include <bits/stdc++.h>
+#include <iostream>
 #include <fstream>
-#include<chrono>
+#include <sstream>
+#include <vector>
+#include <queue>
+#include <string>
+#include <algorithm>
+#include <chrono>
+
 using namespace std;
 using namespace std::chrono;
 
@@ -12,63 +18,60 @@ public:
 
     Task() : name(""), description(""), priority(-1) {}
 
-    Task(const string& _name, const string& _description, int _priority) : name(_name), description(_description), priority(_priority) {}
+    Task(const string& na, const string& des, int pri) : name(na), description(des), priority(pri) {}
 
     bool operator>(const Task& other) const {
         return priority > other.priority;
     }
 };
+
 class TaskManager {
 private:
-    priority_queue<Task, vector<Task>, greater<Task>> pq;
+    priority_queue<Task, vector<Task>, greater<Task>> pq; // To sort the tasks in ascending- cpp stl syntax
 
 public:
     TaskManager() {}
 
     void addTask(const string& name, const string& description, int priority) {
-    Task task{name, description, priority};
-    pq.push(task);
-}
-
-
-    void loadFromCSV(const string& filename) {
-        ifstream file(filename);
-
-        if (!file.is_open()) {
-            cerr << "Error: Unable to open file for reading." << endl;
-            return;
-        }
-
-        // Skip the first line
-        string line;
-        getline(file, line);
-
-        while (getline(file, line)) {
-            stringstream ss(line);
-            string name, description, priorityStr;
-            getline(ss, name, ',');
-            getline(ss, description, ',');
-            getline(ss, priorityStr, ',');
-
-            try {
-                int priority = stoi(priorityStr);
-                addTask(name, description, priority);
-            } catch (const std::invalid_argument& e) {
-                cerr << "Invalid priority value encountered in the file: " << priorityStr << endl;
-                // Handle the error, e.g., skip this line or take appropriate action
-            }
-        }
-
-        file.close();
+        Task task{name, description, priority};
+        pq.push(task);
     }
 
-    void saveToCSV(const string& filename) {
+    Task removeTask(int index) {
+        if (index < 1 || index > pq.size()) {
+            cerr << "Invalid index. No task removed." << endl;
+            return Task("", "", -1); 
+        }
+
         vector<Task> tasks;
         while (!pq.empty()) {
             tasks.push_back(pq.top());
             pq.pop();
         }
 
+        Task removedTask = tasks[index - 1];
+        tasks.erase(tasks.begin() + index - 1);
+
+        for (const auto& task : tasks) {
+            pq.push(task);
+        }
+
+        return removedTask;
+    }
+
+    void printTasks() {
+        cout << "Pending Tasks:" << endl;
+        priority_queue<Task, vector<Task>, greater<Task>> pqCopy = pq;
+        int index = 1;
+        while (!pqCopy.empty()) {
+            Task task = pqCopy.top();
+            cout << index << ". Name: " << task.name << ", Description: " << task.description << ", Priority: " << task.priority << endl;
+            pqCopy.pop();
+            ++index;
+        }
+    }
+
+    void saveToCSV(const string& filename) {
         ofstream file(filename);
 
         if (!file.is_open()) {
@@ -78,64 +81,29 @@ public:
 
         file << "Task Name,Description,Priority\n";
 
+        vector<Task> tasks;
+        while (!pq.empty()) {
+            tasks.push_back(pq.top());
+            pq.pop();
+        }
+
         for (const auto& task : tasks) {
             file << task.name << "," << task.description << "," << task.priority << "\n";
         }
 
         file.close();
     }
-
-    Task removeTask(int index) {
-    if (index < 1 || index > pq.size()) {
-        cerr << "Invalid index. No task removed." << endl;
-        return Task("", "", -1); // Return an empty task
-    }
-
-    // Copy tasks to a vector
-    vector<Task> tasks;
-    while (!pq.empty()) {
-        tasks.push_back(pq.top());
-        pq.pop();
-    }
-
-    // Remove task at the specified index
-    Task removedTask = tasks[index - 1];
-    tasks.erase(tasks.begin() + index - 1);
-
-    // Rebuild the priority queue
-    for (const auto& task : tasks) {
-        pq.push(task);
-    }
-
-    return removedTask;
-}
-
-    void printTasks() {
-        cout << "Pending Tasks:" << endl;
-        priority_queue<Task, vector<Task>, greater<Task>> pqCopy = pq; // Copy the priority queue
-        int index = 1;
-        while (!pqCopy.empty()) {
-            Task task = pqCopy.top();
-            cout << index << ". Name: " << task.name << ", Description: " << task.description << ", Priority: " << task.priority << endl;
-            pqCopy.pop();
-            ++index;
-        }
-    }
 };
 
 int main() {
+    TaskManager taskManager;
+    string filename = "Task_Manager.csv";
+
     int maxTasks;
-    string author;
+    
 
     cout << "Enter maximum number of tasks: ";
     cin >> maxTasks;
-    cout << endl;
-
-    cout << "Enter name of Author: ";
-    cin >> author;
-    cout << endl;
-
-    TaskManager taskManager;
     Task task;
 
     while (true) {
@@ -144,22 +112,23 @@ int main() {
         cout << "Press 2 to complete a Task" << endl;
         cout << "Press 3 to display All Pending Tasks" << endl;
         cout << "Press 4 to Exit from program" << endl;
+        cout << "Enter your choice: ";
 
         int choice;
-        cout << "Enter your choice: ";
         cin >> choice;
 
         switch (choice) {
             case 1:
                 cout << "Enter Task Name: ";
-                cin >> task.name;
+                cin.ignore();
+                getline(cin, task.name);
                 cout << "Enter Task Description: ";
-                cin >> task.description;
+                getline(cin, task.description);
                 cout << "Enter Task Priority: ";
                 cin >> task.priority;
                 taskManager.addTask(task.name, task.description, task.priority);
                 break;
-             
+
             case 2:
                 int index;
                 taskManager.printTasks();
@@ -172,21 +141,22 @@ int main() {
                     cout << "No task removed." << endl;
                 }
                 break;
-                
+
             case 3:
                 taskManager.printTasks();
                 break;
-                
+
             case 4:
-                taskManager.saveToCSV("tasks_sorted.csv");
-                cout << "Tasks saved to CSV file: tasks_sorted.csv" << endl;
+                taskManager.saveToCSV(filename);
+                cout << "Tasks saved to CSV file: " << filename << endl;
                 cout << "Exiting..." << endl;
                 return 0;
-                
+
             default:
                 cout << "Invalid choice, please try again." << endl;
                 break;
         }
     }
+
     return 0;
 }
