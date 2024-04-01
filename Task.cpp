@@ -1,5 +1,10 @@
-#include <bits/stdc++.h>
-#include "ExcelFormat.h" // Include the ExcelFormat library
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <queue>
+#include <string>
+#include <algorithm>
 #include <chrono>
 
 using namespace std;
@@ -8,81 +13,111 @@ using namespace std::chrono;
 struct Task {
     string name;
     string description;
-    chrono::time_point<chrono::system_clock> deadline; // Change type to time_point
+    int priority;
+
+    Task(const string& _name, const string& _description, int _priority) : name(_name), description(_description), priority(_priority) {}
+
+    bool operator>(const Task& other) const {
+        return priority > other.priority;
+    }
 };
 
 class TaskManager {
 private:
-    vector<Task> list;
+    priority_queue<Task, vector<Task>, greater<Task>> pq;
 
 public:
     TaskManager() {}
 
-    void addTask(const string& name, const string& description, const chrono::time_point<chrono::system_clock>& deadline) {
-        Task task{name, description, deadline};
-        list.push_back(task);
+    void addTask(const string& name, const string& description, int priority) {
+        Task task{name, description, priority};
+        pq.push(task);
     }
 
-    void sortTasksByDeadline() {
-        sort(list.begin(), list.end(), [](const Task& a, const Task& b) {
-            return a.deadline < b.deadline;
-        });
+    void loadFromCSV(const string& filename) {
+    ifstream file(filename);
+
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file for reading." << endl;
+        return;
     }
 
-    void saveToExcel(const string& filename) {
-        ExcelFormat::BasicExcel xls;
-        xls.New(1); // Create a new Excel file with 1 sheet
-        ExcelFormat::BasicExcelWorksheet* sheet = xls.GetWorksheet(0);
+    // Skip the first line
+    string line;
+    getline(file, line);
 
-        // Set column headers
-        sheet->Cell(0, 0)->SetString("Task Name");
-        sheet->Cell(0, 1)->SetString("Description");
-        sheet->Cell(0, 2)->SetString("Deadline");
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string name, description, priorityStr;
+        getline(ss, name, ',');
+        getline(ss, description, ',');
+        getline(ss, priorityStr, ',');
 
-        // Write task data to Excel
-        for (size_t i = 0; i < list.size(); ++i) {
-            sheet->Cell(i + 1, 0)->SetString(list[i].name.c_str());
-            sheet->Cell(i + 1, 1)->SetString(list[i].description.c_str());
-            // Convert deadline to string for Excel
-            auto deadline_time_t = chrono::system_clock::to_time_t(list[i].deadline);
-            string deadline_str = ctime(&deadline_time_t);
-            sheet->Cell(i + 1, 2)->SetString(deadline_str.c_str());
+        try {
+            int priority = stoi(priorityStr);
+            addTask(name, description, priority);
+        } catch (const std::invalid_argument& e) {
+            cerr << "Invalid priority value encountered in the file: " << priorityStr << endl;
+            // Handle the error, e.g., skip this line or take appropriate action
+        }
+    }
+
+    file.close();
+}
+    void saveToCSV(const string& filename) {
+        vector<Task> tasks;
+        while (!pq.empty()) {
+            tasks.push_back(pq.top());
+            pq.pop();
         }
 
-        // Save the Excel file
-        xls.SaveAs(filename.c_str());
+        ofstream file(filename);
+
+        if (!file.is_open()) {
+            cerr << "Error: Unable to open file for writing." << endl;
+            return;
+        }
+
+        file << "Task Name,Description,Priority\n";
+
+        for (const auto& task : tasks) {
+            file << task.name << "," << task.description << "," << task.priority << "\n";
+        }
+
+        file.close();
     }
 };
 
 int main() {
     TaskManager taskManager;
-    int n;
+    string filename = "tasks_sorted.csv";
 
+    taskManager.loadFromCSV(filename);
+
+    int n;
     cout << "Enter the number of tasks you want to enter: ";
     cin >> n;
 
-    string name, description;
-    int year, month, day, hour, minute;
+    cin.ignore(); // Ignore newline character after entering n
 
     for (int i = 0; i < n; ++i) {
-        cout << "Enter Task Name: ";
-        cin >> name;
-        cout << "Enter description for the task: ";
-        cin >> description;
-        cout << "Enter Deadline for the task (YYYY MM DD HH MM): ";
-        cin >> year >> month >> day >> hour >> minute;
+        string name, description;
+        int priority;
 
-        // Construct deadline time_point
-        system_clock::time_point deadline = system_clock::from_time_t(0);
-        deadline += hours(hour) + minutes(minute);
+        cout << "Enter Task Name for Task " << i + 1 << ": ";
+        getline(cin, name);
+        cout << "Enter description for Task " << i + 1 << ": ";
+        getline(cin, description);
+        cout << "Enter Priority for Task " << i + 1 << ": ";
+        cin >> priority;
 
-        taskManager.addTask(name, description, deadline);
+        cin.ignore(); // Ignore newline character after entering priority
+
+        taskManager.addTask(name, description, priority);
     }
 
-    taskManager.sortTasksByDeadline(); // Sort tasks by deadline
-    string filename = "tasks_sorted.xlsx"; // Change the filename if needed
-    taskManager.saveToExcel(filename);
-    cout << "Tasks saved to Excel file: " << filename << endl;
+    taskManager.saveToCSV(filename);
+    cout << "Tasks saved to CSV file: " << filename << endl;
 
     return 0;
 }
