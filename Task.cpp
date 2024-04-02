@@ -14,11 +14,12 @@ class Task {
 public:
     string name;
     string description;
+    string deadline;
     int priority;
 
-    Task() : name(""), description(""), priority(-1) {}
+    Task() : name(""), description(""), deadline(""), priority(-1) {}
 
-    Task(const string& na, const string& des, int pri) : name(na), description(des), priority(pri) {}
+    Task(const string& na, const string& des, const string& dl, int pri) : name(na), description(des), deadline(dl), priority(pri) {}
 
     bool operator>(const Task& other) const {
         return priority > other.priority;
@@ -27,20 +28,20 @@ public:
 
 class TaskManager {
 private:
-    priority_queue<Task, vector<Task>, greater<Task>> pq; // To sort the tasks in ascending- cpp stl syntax
+    priority_queue<Task, vector<Task>, greater<Task>> pq;
 
 public:
     TaskManager() {}
 
-    void addTask(const string& name, const string& description, int priority) {
-        Task task{name, description, priority};
+    void addTask(const string& name, const string& description, const string& deadline, int priority) {
+        Task task{name, description, deadline, priority};
         pq.push(task);
     }
 
     Task removeTask(int index) {
         if (index < 1 || index > pq.size()) {
             cerr << "Invalid index. No task removed." << endl;
-            return Task("", "", -1); 
+            return Task("", "", "", -1); 
         }
 
         vector<Task> tasks;
@@ -65,32 +66,51 @@ public:
         int index = 1;
         while (!pqCopy.empty()) {
             Task task = pqCopy.top();
-            cout << index << ". Name: " << task.name << ", Description: " << task.description << ", Priority: " << task.priority << endl;
+            cout << index << ". Name: " << task.name << ", Description: " << task.description << ", Deadline: " << task.deadline << ", Priority: " << task.priority << endl;
             pqCopy.pop();
             ++index;
         }
     }
 
     void saveToCSV(const string& filename) {
-        ofstream file(filename);
-
-        if (!file.is_open()) {
-            cerr << "Error: Unable to open file for writing." << endl;
-            return;
+        vector<Task> tasks;
+        ifstream existingFile(filename);
+        if (existingFile.is_open()) {
+            string header;
+            getline(existingFile, header);
+            string line;
+            while (getline(existingFile, line)) {
+                stringstream ss(line);
+                string name, description, deadline;
+                int priority;
+                getline(ss, name, ',');
+                getline(ss, description, ',');
+                getline(ss, deadline, ',');
+                ss >> priority;
+                tasks.push_back(Task(name, description, deadline, priority));
+            }
+            existingFile.close();
         }
 
-        file << "Task Name,Description,Priority\n";
-
-        vector<Task> tasks;
         while (!pq.empty()) {
             tasks.push_back(pq.top());
             pq.pop();
         }
 
-        for (const auto& task : tasks) {
-            file << task.name << "," << task.description << "," << task.priority << "\n";
+        sort(tasks.begin(), tasks.end(), [](const Task& a, const Task& b) {
+            return a.priority < b.priority;
+        });
+
+        ofstream file(filename);
+        if (!file.is_open()) {
+            cerr << "Error: Unable to open file for writing." << endl;
+            return;
         }
 
+        file << "Task Name,Description,Deadline,Priority\n";
+        for (const auto& task : tasks) {
+            file << task.name << "," << task.description << "," << task.deadline << "," << task.priority << "\n";
+        }
         file.close();
     }
 };
@@ -100,7 +120,6 @@ int main() {
     string filename = "Task_Manager.csv";
 
     int maxTasks;
-    
 
     cout << "Enter maximum number of tasks: ";
     cin >> maxTasks;
@@ -124,9 +143,11 @@ int main() {
                 getline(cin, task.name);
                 cout << "Enter Task Description: ";
                 getline(cin, task.description);
+                cout << "Enter Task Deadline (hh:mm): ";
+                getline(cin, task.deadline);
                 cout << "Enter Task Priority: ";
                 cin >> task.priority;
-                taskManager.addTask(task.name, task.description, task.priority);
+                taskManager.addTask(task.name, task.description, task.deadline, task.priority);
                 break;
 
             case 2:

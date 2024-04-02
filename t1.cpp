@@ -1,11 +1,5 @@
-#include <iostream>
+#include <bits/stdc++.h>
 #include <fstream>
-#include <sstream>
-#include <vector>
-#include <queue>
-#include <string>
-#include <algorithm>
-#include <chrono>
 
 using namespace std;
 using namespace std::chrono;
@@ -14,23 +8,20 @@ class Task {
 public:
     string name;
     string description;
-    string deadline; // Deadline in format "hh:mm"
+    string deadline;
 
     Task() : name(""), description(""), deadline("") {}
 
     Task(const string& na, const string& des, const string& dl) : name(na), description(des), deadline(dl) {}
 
     bool operator>(const Task& other) const {
-        // Calculate priority based on deadline
         auto now = system_clock::now();
         auto deadlineTime = system_clock::from_time_t(parseDeadline(deadline));
         auto timeDiff = deadlineTime - now;
         return timeDiff > other.timeUntilDeadline();
     }
 
-    // Parse the deadline string and convert it to time_t
     time_t parseDeadline(const string& dl) const {
-        // Split the time string into hours and minutes
         size_t pos = dl.find(':');
         if (pos == string::npos) {
             cerr << "Invalid time format." << endl;
@@ -38,8 +29,6 @@ public:
         }
         string hourStr = dl.substr(0, pos);
         string minStr = dl.substr(pos + 1);
-
-        // Convert hours and minutes to integers
         int hours, mins;
         try {
             hours = stoi(hourStr);
@@ -51,19 +40,14 @@ public:
             cerr << "Time values out of range." << endl;
             return 0;
         }
-
-        // Get current time
         time_t now = system_clock::to_time_t(system_clock::now());
-        tm deadline_tm = *localtime(&now); // Initialize with current date and time
+        tm deadline_tm = *localtime(&now);
         deadline_tm.tm_hour = hours;
         deadline_tm.tm_min = mins;
-
-        // Convert tm struct to time_t
         time_t deadlineTime = mktime(&deadline_tm);
         return deadlineTime;
     }
 
-    // Calculate time until deadline
     duration<double> timeUntilDeadline() const {
         auto now = system_clock::now();
         auto deadlineTime = system_clock::from_time_t(parseDeadline(deadline));
@@ -74,7 +58,7 @@ public:
 
 class TaskManager {
 private:
-    priority_queue<Task, vector<Task>, greater<Task>> pq; // To sort the tasks based on deadline
+    priority_queue<Task, vector<Task>, greater<Task>> pq;
     int maxTasks;
 
 public:
@@ -113,21 +97,17 @@ public:
 
     void saveToCSV(const string& filename) {
         ofstream file(filename);
-
         if (!file.is_open()) {
             cerr << "Error: Unable to open file for writing." << endl;
             return;
         }
-
         file << "Task Name,Description,Deadline\n";
-
         priority_queue<Task, vector<Task>, greater<Task>> pqCopy = pq;
         while (!pqCopy.empty()) {
             Task task = pqCopy.top();
             file << task.name << "," << task.description << "," << task.deadline << "\n";
             pqCopy.pop();
         }
-
         file.close();
     }
 };
@@ -136,7 +116,7 @@ int main() {
     cout << "Enter maximum number of tasks: ";
     int maxTasks;
     cin >> maxTasks;
-    cin.ignore(); // Ignore the newline character left in the input buffer
+    cin.ignore();
 
     TaskManager taskManager(maxTasks);
     string filename = "Task_Manager.csv";
@@ -151,7 +131,7 @@ int main() {
 
         int choice;
         cin >> choice;
-        cin.ignore(); // Ignore the newline character left in the input buffer
+        cin.ignore();
 
         switch (choice) {
             case 1: {
