@@ -154,7 +154,6 @@ public:
 
 
     time_t parseCurrentTime(const string& currentTime) const {
-        // Split the time string into hours and minutes
         size_t pos = currentTime.find(':');
         if (pos == string::npos) {
             cerr << "Invalid time format." << endl;
