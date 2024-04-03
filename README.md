@@ -1,51 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Function List</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin-bottom: 10px;
-        }
-        img {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-    </style>
-</head>
-<body style="background-color:#CBDDB0">
-  
-        <img src="https://images-platform.99static.com/8mc2pZDV0s_nXHMZOF--H-QhZzY=/500x500/top/smart/99designs-contests-attachments/20/20319/attachment_20319607" alt="Image" class="center" width="200" height="175"  />
+<img src="https://raw.githubusercontent.com/Tastyep/TaskManager/master/assets/task_manager_logo.png">
+<h1> TASK MANAGER USING DATA STRUCTURES </h1>
 
-        <h2> TASK MANAGER USING DATA STRUCTURES </h2>
-<h3> This is my Project for IT205 Course of my College where we as a group have tried developing a task manager program using C++ and appropriate data structures learnt in the course</h3>
-    
-        <h1 style="background-color:#ADDDFF;color:#112A46;">Function List</h1>
-        <ol>
-            <li list-style-type="number" start="1" style="font-family:courier;color:#112A46;"><b> Add Task </b></li>
-            <li style="font-family:courier;color:#112A46;"><b> Complete Task </b></li>
-            <li style="font-family:courier;color:#112A46;"><b> Remove Task </b></li>
-            <li style="font-family:courier;color:#112A46;"><b> Save Tasks To Excel File </b></li>
-            
-        </ol>
-</body>
-</html>
+### This is our Project for IT205 Course of our College where we as a group have tried developing a task manager program using C++ and appropriate data structures learnt in the course
 
+Our Task Manager Application is designed to speed up your task management process, enhance productivity, and offers greater flexibility with the ability to export tasks to Excel. Whether you’re managing multiple work projects or maintaining a To-Do list, our Task Manager Application is here to simplify your life.
+
+---
+
+## Group Members
+
+1. Tirth Gandhi
+2. Sheel Shah
+3. Nakul Patel
+4. Bhaumik Luhar
+
+---
+
+## Function List
+
+- *Add Task:* Users can easily add new tasks. Each task entry allows for a detailed description to ensure you capture all the necessary information for successful completion.
+- *Complete Task:* As tasks are completed, users can mark them as done. This provides a sense of accomplishment and helps track progress.
+- *Remove Task:* Tasks can be deleted with a simple click, allowing users to maintain a clutter-free task list.
+- *Display Pending Tasks:* The application provides a comprehensive view of all pending tasks. This helps users prioritize their work and manage their time effectively.
+- *Save Tasks To Excel File:* Users can now save their tasks in an Excel file. This feature allows for advanced data manipulation, sharing, and offline access.
+
+Our Task Manager Application is designed to speed up your task management process, enhance productivity, and offers greater flexibility with the ability to export tasks to Excel. Whether you’re managing multiple work projects or maintaining a To-Do list, our Task Manager Application is here to simplify your life.
