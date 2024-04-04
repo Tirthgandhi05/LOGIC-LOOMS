@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <chrono>
+#include <limits> // For std::numeric_limits
 
 using namespace std;
 using namespace std::chrono;
@@ -16,13 +17,12 @@ public:
     string description;
     string deadline;
     string status;
-    int priority;
 
-    Task(const string& na, const string& des, const string& dl, int pri)
-        : name(na), description(des), deadline(dl), status("Pending"), priority(pri) {}
+    Task(const string& na, const string& des, const string& dl)
+        : name(na), description(des), deadline(dl), status("Pending") {}
 
     bool operator<(const Task& other) const {
-        return priority < other.priority;
+        return deadline > other.deadline; // Sorting by deadline, earlier deadlines come first
     }
 };
 
@@ -35,12 +35,12 @@ private:
 public:
     TaskManager(int max, const string& file) : maxTasks(max), filename(file) {}
 
-    void addTask(const string& name, const string& description, const string& deadline, int priority) {
+    void addTask(const string& name, const string& description, const string& deadline) {
         if (pq.size() >= maxTasks) {
             cerr << "Maximum number of tasks reached. Cannot add more tasks." << endl;
             return;
         }
-        Task task(name, description, deadline, priority);
+        Task task(name, description, deadline);
         pq.push(task);
     }
 
@@ -96,7 +96,7 @@ public:
             Task task = pqCopy.top();
             if (task.status == "Pending") {
                 cout << index << ". Name: " << task.name << ", Description: " << task.description
-                     << ", Deadline: " << task.deadline << ", Priority: " << task.priority << endl;
+                     << ", Deadline: " << task.deadline << endl;
                 ++index;
             }
             pqCopy.pop();
@@ -129,27 +129,30 @@ public:
         while (!missedTasks.empty()) {
             Task task = missedTasks.top();
             cout << index << ". Name: " << task.name << ", Description: " << task.description
-                 << ", Deadline: " << task.deadline << ", Priority: " << task.priority
-                 << ", Status: " << task.status << endl;
+                 << ", Deadline: " << task.deadline << ", Status: " << task.status << endl;
             missedTasks.pop();
             ++index;
         }
     }
 
-    void saveToCSV() const {
-        ofstream file(filename);
+    void saveToCSV() {
+        ofstream file(filename, ios::app); 
         if (!file.is_open()) {
             cerr << "Error: Unable to open file for writing." << endl;
             return;
         }
 
-        file << "Task Name,Description,Deadline,Priority,Status\n";
+        file.seekp(0, ios::end);
+        bool isEmpty = file.tellp() == 0;
+        if (isEmpty) {
+            file << "Task Name,Description,Deadline,Status\n";
+        }
 
         priority_queue<Task> pqCopy = pq;
         while (!pqCopy.empty()) {
             Task task = pqCopy.top();
             file << task.name << "," << task.description << "," << task.deadline << ","
-                 << task.priority << "," << task.status << "\n";
+                 << task.status << "\n";
             pqCopy.pop();
         }
 
@@ -198,6 +201,13 @@ int main() {
         cin >> choice;
         cin.ignore();
 
+        if (cin.fail()) { // Check if input failed
+            cin.clear(); // Clear the error flags
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard the invalid input
+            cout << "Invalid input. Please enter a valid option." << endl;
+            continue;
+        }
+
         switch (choice) {
             case 1: {
                 cout << "Enter Task Name: ";
@@ -209,10 +219,7 @@ int main() {
                 cout << "Enter Task Deadline (hh:mm): ";
                 string deadline;
                 getline(cin, deadline);
-                cout << "Enter Task Priority: ";
-                int priority;
-                cin >> priority;
-                taskManager.addTask(name, description, deadline, priority);
+                taskManager.addTask(name, description, deadline);
                 break;
             }
 
