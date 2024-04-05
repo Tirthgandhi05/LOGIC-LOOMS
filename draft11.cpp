@@ -74,20 +74,28 @@ public:
         saveToCSV(); 
     }
 
-    void printPendingTasks() const {
-        cout << "Pending Tasks:" << endl;
-        priority_queue<Task> pqCopy = pq;
-        int index = 1;
-        while (!pqCopy.empty()) {
-            Task task = pqCopy.top();
-            if (task.status == "Pending") {
-                cout << index << ". Name: " << task.name << ", Description: " << task.description
-                     << ", Deadline: " << task.deadline << ", Priority: " << task.priority << endl;
-                ++index;
+   void printPendingTasks() const {
+    priority_queue<Task> pqCopy = pq;
+    int index = 1;
+    bool foundPendingTask = false; 
+    while (!pqCopy.empty()) {
+        Task task = pqCopy.top();
+        if (task.status == "Pending") {
+            if (!foundPendingTask) {
+                cout << "Pending Tasks:" << endl;
+                foundPendingTask = true;
             }
-            pqCopy.pop();
+            cout << index << ". Name: " << task.name << ", Description: " << task.description
+                 << ", Deadline: " << task.deadline << ", Priority: " << task.priority << endl;
+            ++index;
         }
+        pqCopy.pop();
     }
+    if (!foundPendingTask) {
+        cout << "No pending tasks." << endl;
+    }
+}
+
 
     void showMissedTasks() const {
         auto currentTime = system_clock::to_time_t(system_clock::now());
