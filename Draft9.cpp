@@ -34,7 +34,7 @@
         bool headerWritten;
 
     public:
-        TaskManager(int max, const string& file) : maxTasks(max), filename(file), headerWritten(false) {}
+        TaskManager(/*int max,*/ const string& file) : /*maxTasks(max),*/ filename(file), headerWritten(false) {}
 
         void addTask(const string& name, const string& description, const string& deadline, int priority) {
             if (pq.size() >= maxTasks) {
@@ -205,16 +205,16 @@
     };
 
     int main() {
-        cout << "Enter maximum number of tasks: ";
-        int maxTasks;
-        cin >> maxTasks;
-        cin.ignore();
+        // cout << "Enter maximum number of tasks: ";
+        // int maxTasks;
+        // cin >> maxTasks;
+        // cin.ignore();
 
         cout << "Enter filename to save tasks(Filename.csv): ";
         string filename;
         getline(cin, filename);
 
-        TaskManager taskManager(maxTasks, filename);
+        TaskManager taskManager(/*maxTasks,*/ filename);
 
         while (true) {
             cout << "--------------------------------------------------" << endl;
@@ -232,10 +232,14 @@
             cin.ignore();
 
             switch (choice) {
-                case 1: {
-                    cout << "Enter Task Name: ";
+             case 1: {
+                while (true) {
+                    cout << "Enter Task Name (or type 'exit' to stop adding tasks): ";
                     string name;
                     getline(cin, name);
+                    if (name == "exit") {
+                        break;
+                    }
                     cout << "Enter Task Description: ";
                     string description;
                     getline(cin, description);
@@ -245,9 +249,12 @@
                     cout << "Enter Task Priority: ";
                     int priority;
                     cin >> priority;
+                    cin.ignore(); 
+                    
                     taskManager.addTask(name, description, deadline, priority);
-                    break;
                 }
+                break;
+            }
 
                 case 2: {
                     cout << "Enter the index of the task to process: ";
