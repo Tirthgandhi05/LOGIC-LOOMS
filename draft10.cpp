@@ -18,8 +18,8 @@ public:
     string status;
     int priority;
 
-    Task(const string& na, const string& des, const string& dl, int pri)
-        : name(na), description(des), deadline(dl), status("Pending"), priority(pri) {}
+    Task(const string& na, const string& des, const string& dl, int pri, const string& stat = "Pending")
+        : name(na), description(des), deadline(dl), status(stat), priority(pri) {}
 
     bool operator<(const Task& other) const {
         return priority < other.priority;
@@ -34,7 +34,9 @@ private:
     bool headerWritten;
 
 public:
-    TaskManager(int max, const string& file) : maxTasks(max), filename(file), headerWritten(false) {}
+    TaskManager(int max, const string& file) : maxTasks(max), filename(file), headerWritten(false) {
+        loadFromCSV(); // Load tasks from the CSV file
+    }
 
     void addTask(const string& name, const string& description, const string& deadline, int priority) {
         if (pq.size() >= maxTasks) {
@@ -73,21 +75,6 @@ public:
         saveToCSV(); // Save the updated tasks to the CSV file
     }
 
-    void printPendingTasks() const {
-        cout << "Pending Tasks:" << endl;
-        priority_queue<Task> pqCopy = pq;
-        int index = 1;
-        while (!pqCopy.empty()) {
-            Task task = pqCopy.top();
-            if (task.status == "Pending") {
-                cout << index << ". Name: " << task.name << ", Description: " << task.description
-                     << ", Deadline: " << task.deadline << ", Priority: " << task.priority << endl;
-                ++index;
-            }
-            pqCopy.pop();
-        }
-    }
-
     void showMissedTasks() const {
         auto currentTime = system_clock::to_time_t(system_clock::now());
         priority_queue<Task> missedTasks;
@@ -121,23 +108,66 @@ public:
         }
     }
 
+    void suggestNextTask() const {
+    vector<Task> tasks;
+    priority_queue<Task> pqCopy = pq;
+    
+    while (!pqCopy.empty()) {
+        tasks.push_back(pqCopy.top());
+        pqCopy.pop();
+    }
 
+    sort(tasks.begin(), tasks.end(), [this](const Task& a, const Task& b) {
+        time_t aDeadlineTime = parseDeadline(a.deadline);
+        time_t bDeadlineTime = parseDeadline(b.deadline);
+        return aDeadlineTime < bDeadlineTime;
+    });
 
+    if (tasks.empty()) {
+        cout << "No tasks to suggest." << endl;
+        return;
+    }
+
+    cout << "You should do the following task first:" << endl;
+    Task nextTask = tasks.front();
+    cout << "Name: " << nextTask.name << ", Description: " << nextTask.description
+         << ", Deadline: " << nextTask.deadline << ", Priority: " << nextTask.priority << endl;
+}
 private:
-    void saveToCSV(const Task& task) {
-        ofstream file(filename, ios::app); 
+    void loadFromCSV() {
+        ifstream file(filename);
         if (!file.is_open()) {
-            cerr << "Error: Unable to open file for writing." << endl;
+            cerr << "Error: Unable to open file for reading." << endl;
             return;
         }
 
-        
-        file.seekp(0, ios::end);
-        bool isEmpty = file.tellp() == 0;
-        file.seekp(0, ios::beg);
+        string line;
+        getline(file, line); // Skip header
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string name, description, deadline, status;
+            int priority;
+            getline(ss, name, ',');
+            getline(ss, description, ',');
+            getline(ss, deadline, ',');
+            ss >> priority;
+            getline(ss, status, ',');
 
-        if (isEmpty) {  
-            file << "Task Name,Description,Deadline,Priority,Status\n";
+            if (status.empty()) {
+                status = "Pending";
+            }
+
+            pq.push(Task(name, description, deadline, priority, status));
+        }
+
+        file.close();
+    }
+
+    void saveToCSV(const Task& task) {
+        ofstream file(filename, ios::app);
+        if (!file.is_open()) {
+            cerr << "Error: Unable to open file for writing." << endl;
+            return;
         }
 
         file << task.name << "," << task.description << "," << task.deadline << ","
@@ -145,8 +175,9 @@ private:
 
         file.close();
     }
+
     void saveToCSV() {
-        ofstream file(filename, ios::trunc); 
+        ofstream file(filename, ios::trunc);
         if (!file.is_open()) {
             cerr << "Error: Unable to open file for writing." << endl;
             return;
@@ -166,49 +197,34 @@ private:
     }
 
     time_t parseDeadline(const string& dl) const {
-    stringstream ss(dl);
-    int hour, min;
-    char colon;
-    ss >> hour >> colon >> min;
+        stringstream ss(dl);
+        int hour, min;
+        char colon;
+        ss >> hour >> colon >> min;
 
-    time_t now = time(nullptr);
-    tm* deadline_tm = localtime(&now);
-    deadline_tm->tm_hour = hour;
-    deadline_tm->tm_min = min;
-    deadline_tm->tm_sec = 0;
+        time_t now = time(nullptr);
+        tm* deadline_tm = localtime(&now);
+        deadline_tm->tm_hour = hour;
+        deadline_tm->tm_min = min;
+        deadline_tm->tm_sec = 0;
 
-    return mktime(deadline_tm);
-}
+        return mktime(deadline_tm);
+    }
 
 public:
-    void suggestNextTask() const {
-        vector<Task> tasks;
+    void displayTasks() const {
+        cout << "Tasks:" << endl;
         priority_queue<Task> pqCopy = pq;
+        int index = 1;
         while (!pqCopy.empty()) {
-            tasks.push_back(pqCopy.top());
+            Task task = pqCopy.top();
+            cout << index << ". Name: " << task.name << ", Description: " << task.description
+                 << ", Deadline: " << task.deadline << ", Priority: " << task.priority
+                 << ", Status: " << task.status << endl;
             pqCopy.pop();
+            ++index;
         }
-
-      sort(tasks.begin(), tasks.end(), [this] (const Task& a, const Task& b) {
-    if (a.priority == b.priority) {
-        time_t aDeadlineTime = parseDeadline(a.deadline);
-        time_t bDeadlineTime = parseDeadline(b.deadline);
-        return aDeadlineTime < bDeadlineTime;
     }
-    return a.priority > b.priority;
-});
-
-        if (tasks.empty()) {
-            cout << "No tasks to suggest." << endl;
-            return;
-        }
-
-        cout << "You should do the following task first:" << endl;
-        Task nextTask = tasks.front();
-        cout << "Name: " << nextTask.name << ", Description: " << nextTask.description
-             << ", Deadline: " << nextTask.deadline << ", Priority: " << nextTask.priority << endl;
-    }
-
 };
 
 int main() {
@@ -227,9 +243,9 @@ int main() {
         cout << "--------------------------------------------------" << endl;
         cout << "Press 1 to add New Task" << endl;
         cout << "Press 2 to complete a Task" << endl;
-        cout << "Press 3 to display Pending Tasks" << endl;
-        cout << "Press 4 to show Missed Tasks" << endl;
-        cout << "Press 5 to Get A Summary of Your To-Do List"<<endl;
+        cout << "Press 3 to show Missed Tasks" << endl;
+        cout << "Press 4 to Get A Summary of Your To-Do List" << endl;
+        cout << "Press 5 to Display All Tasks" << endl;
         cout << "Press 6 to Exit from program" << endl;
 
         cout << "Enter your choice: ";
@@ -257,6 +273,7 @@ int main() {
             }
 
             case 2: {
+                taskManager.displayTasks();
                 cout << "Enter the index of the task to process: ";
                 int index;
                 cin >> index;
@@ -265,23 +282,21 @@ int main() {
             }
 
             case 3:
-                taskManager.printPendingTasks();
-                break;
-
-            case 4:
                 taskManager.showMissedTasks();
                 break;
 
-            case 5:
-               
+            case 4:
                 taskManager.suggestNextTask();
+                break;
+
+            case 5:
+                taskManager.displayTasks();
                 break;
 
             case 6:
                 cout << "Exiting..." << endl;
                 return 0;
 
-            
             default:
                 cout << "Invalid choice, please try again." << endl;
                 break;
