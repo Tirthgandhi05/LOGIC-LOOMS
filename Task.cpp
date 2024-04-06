@@ -148,47 +148,75 @@ public:
 
 private:
     void loadFromCSV() {
-        ifstream file(filename);
-        if (!file.is_open()) {
-            cerr << "Error: Unable to open file for reading." << endl;
-            return;
-        }
-
-        string line;
-        getline(file, line); 
-        while (getline(file, line)) {
-            stringstream ss(line);
-            string name, description, deadline, status;
-            int priority;
-            getline(ss, name, ',');
-            getline(ss, description, ',');
-            getline(ss, deadline, ',');
-            ss >> priority;
-            ss.ignore(); 
-            getline(ss, status, ','); 
-
-            if (status.empty() || (status != "Done" && status != "Late Done" && status != "Pending")) {
-                status = "Pending";
-            }
-
-            pq.push(Task(name, description, deadline, priority, status));
-        }
-
-        file.close();
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file for reading." << endl;
+        return;
     }
 
-    void saveToCSV(const Task& task) {
-        ofstream file(filename, ios::app);
-        if (!file.is_open()) {
+    // Check if the file is empty
+    file.seekg(0, ios::end);
+    if (file.tellg() == 0) {
+        file.close();
+        return; // File is empty, no need to load tasks, just return
+    }
+    file.seekg(0, ios::beg); // Reset file pointer if not empty
+
+    string line;
+    getline(file, line);
+    if (line != "Task Name,Description,Deadline,Priority,Status") {
+        cerr << "Header not found. Adding header..." << endl;
+        file.close();
+        ofstream outFile(filename, ios::app);
+        if (!outFile.is_open()) {
             cerr << "Error: Unable to open file for writing." << endl;
             return;
         }
-
-        file << task.name << "," << task.description << "," << task.deadline << ","
-             << task.priority << "," << task.status << "\n";
-
-        file.close();
+        outFile << "Task Name,Description,Deadline,Priority,Status\n";
+        outFile.close();
+        return;
     }
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string name, description, deadline, status;
+        int priority;
+        getline(ss, name, ',');
+        getline(ss, description, ',');
+        getline(ss, deadline, ',');
+        ss >> priority;
+        ss.ignore(); 
+        getline(ss, status, ','); 
+
+        if (status.empty() || (status != "Done" && status != "Late Done" && status != "Pending")) {
+            status = "Pending";
+        }
+
+        pq.push(Task(name, description, deadline, priority, status));
+    }
+
+    file.close();
+}
+
+
+    void saveToCSV(const Task& task) {
+    ofstream file(filename, ios::app);
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file for writing." << endl;
+        return;
+    }
+
+    file.seekp(0, ios::end);
+    if (file.tellp() == 0) {
+        
+        file << "Task Name,Description,Deadline,Priority,Status\n";
+    }
+
+    file << task.name << "," << task.description << "," << task.deadline << ","
+         << task.priority << "," << task.status << "\n";
+
+    file.close();
+}
+
 
     void saveToCSV() {
         ofstream file(filename, ios::trunc);
