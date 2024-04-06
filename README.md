@@ -10,10 +10,10 @@ Our Task Manager Application is designed to speed up your task management proces
 
 ## Group Members
 
-## 1. Tirth Gandhi
-## 2. Sheel Shah
-## 3. Nakul Patel
-## 4. Bhaumik Luhar
+<h3> 1. Tirth Gandhi </h3>
+<h3> 2. Sheel Shah </h3>
+<h3> 3. Nakul Patel </h3>
+<h3> 4. Bhaumik Luhar </h3>
 
 ---
 
