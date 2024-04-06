@@ -1,11 +1,4 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <queue>
-#include <string>
-#include <algorithm>
-#include <chrono>
+#include <bits/stdc++.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -35,7 +28,7 @@ private:
 
 public:
     TaskManager(const string& file) :  filename(file), headerWritten(false) {
-        loadFromCSV(); // Load tasks from the CSV file
+        loadFromCSV(); 
     }
 
     void addTask(const string& name, const string& description, const string& deadline, int priority) {
@@ -45,7 +38,7 @@ public:
         }
         Task task(name, description, deadline, priority);
         pq.push(task);
-        saveToCSV(task); // Append the newly added task to the CSV file
+        saveToCSV(task); 
     }
 
     void processTask(int index) {
@@ -74,7 +67,7 @@ public:
         }
 
         pq = tempQueue;
-        saveToCSV(); // Save the updated tasks to the CSV file
+        saveToCSV(); 
     }
 
     void showMissedTasks() const {
@@ -136,37 +129,53 @@ public:
              << ", Deadline: " << nextTask.deadline << ", Priority: " << nextTask.priority << endl;
     }
 
-private:
-    void loadFromCSV() {
-    ifstream file(filename);
-    if (!file.is_open()) {
-        cerr << "Error: Unable to open file for reading." << endl;
-        return;
-    }
+    vector<Task> remainder() const {
+        auto currentTime = system_clock::to_time_t(system_clock::now());
+        vector<Task> reminders;
 
-    string line;
-    getline(file, line); // Skip header
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string name, description, deadline, status;
-        int priority;
-        getline(ss, name, ',');
-        getline(ss, description, ',');
-        getline(ss, deadline, ',');
-        ss >> priority;
-        ss.ignore(); // Ignore the comma after priority
-        getline(ss, status, ','); // Read status
-
-        // Set status to "Pending" if not specified in the file
-        if (status.empty() || (status != "Done" && status != "Late Done" && status != "Pending")) {
-            status = "Pending";
+        priority_queue<Task> pqCopy = pq;
+        while (!pqCopy.empty()) {
+            Task task = pqCopy.top();
+            pqCopy.pop();
+            time_t deadlineTime = parseDeadline(task.deadline);
+            if (deadlineTime >= currentTime && deadlineTime <= currentTime + 3600) { 
+                reminders.push_back(task);
+            }
         }
 
-        pq.push(Task(name, description, deadline, priority, status));
+        return reminders;
     }
 
-    file.close();
-}
+private:
+    void loadFromCSV() {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cerr << "Error: Unable to open file for reading." << endl;
+            return;
+        }
+
+        string line;
+        getline(file, line); 
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string name, description, deadline, status;
+            int priority;
+            getline(ss, name, ',');
+            getline(ss, description, ',');
+            getline(ss, deadline, ',');
+            ss >> priority;
+            ss.ignore(); 
+            getline(ss, status, ','); 
+
+            if (status.empty() || (status != "Done" && status != "Late Done" && status != "Pending")) {
+                status = "Pending";
+            }
+
+            pq.push(Task(name, description, deadline, priority, status));
+        }
+
+        file.close();
+    }
 
     void saveToCSV(const Task& task) {
         ofstream file(filename, ios::app);
@@ -233,18 +242,26 @@ public:
 };
 
 int main() {
-    // cout << "Enter maximum number of tasks: ";
-    // int maxTasks;
-    // cin >> maxTasks;
-    // cin.ignore();
-
     cout << "Enter filename to save tasks: ";
     string filename;
     getline(cin, filename);
 
     TaskManager taskManager(filename);
+    cout << "--------------------------------------------------" << endl;
+    
 
     while (true) {
+        cout << "--------------------------------------------------" << endl;
+        vector<Task> reminders = taskManager.remainder();
+        if (reminders.empty()) {
+            cout << "No tasks with deadlines within 1 hour." << endl;
+            } 
+        else {
+            cout << "Tasks with deadlines within 1 hour:" << endl;
+            for (const auto& task : reminders) {
+                cout << "Name: " << task.name << ", Description: " << task.description<< ", Deadline: " << task.deadline << ", Priority: " << task.priority << endl;
+                }
+        }
         cout << "--------------------------------------------------" << endl;
         cout << "Press 1 to add New Task" << endl;
         cout << "Press 2 to complete a Task" << endl;
