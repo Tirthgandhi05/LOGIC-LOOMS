@@ -22,7 +22,6 @@ public:
 class TaskManager {
 private:
     priority_queue<Task> pq;
-    int maxTasks;
     string filename;
     bool headerWritten;
 
@@ -32,13 +31,9 @@ public:
     }
 
     void addTask(const string& name, const string& description, const string& deadline, int priority) {
-        if (pq.size() >= maxTasks) {
-            cerr << "Maximum number of tasks reached. Cannot add more tasks." << endl;
-            return;
-        }
         Task task(name, description, deadline, priority);
         pq.push(task);
-        saveToCSV(task); 
+        saveToCSV(); 
     }
 
     void processTask(int index) {
@@ -145,6 +140,26 @@ public:
 
         return reminders;
     }
+    void removeTask(int index) {
+        if (index < 1 || index > pq.size()) {
+            cerr << "Invalid task index." << endl;
+            return;
+        }
+
+        priority_queue<Task> tempQueue;
+        int i = 1;
+        while (!pq.empty()) {
+            Task task = pq.top();
+            pq.pop();
+            if (i != index) {
+                tempQueue.push(task);
+            }
+            ++i;
+        }
+
+        pq = tempQueue;
+        saveToCSV(); 
+    }
 
 private:
     void loadFromCSV() {
@@ -196,27 +211,6 @@ private:
 
     file.close();
 }
-
-
-    void saveToCSV(const Task& task) {
-    ofstream file(filename, ios::app);
-    if (!file.is_open()) {
-        cerr << "Error: Unable to open file for writing." << endl;
-        return;
-    }
-
-    file.seekp(0, ios::end);
-    if (file.tellp() == 0) {
-        
-        file << "Task Name,Description,Deadline,Priority,Status\n";
-    }
-
-    file << task.name << "," << task.description << "," << task.deadline << ","
-         << task.priority << "," << task.status << "\n";
-
-    file.close();
-}
-
 
     void saveToCSV() {
         ofstream file(filename, ios::trunc);
@@ -283,12 +277,12 @@ int main() {
         vector<Task> reminders = taskManager.remainder();
         if (reminders.empty()) {
             cout << "No tasks with deadlines within 1 hour." << endl;
-            } 
+        } 
         else {
             cout << "Tasks with deadlines within 1 hour:" << endl;
             for (const auto& task : reminders) {
                 cout << "Name: " << task.name << ", Description: " << task.description<< ", Deadline: " << task.deadline << ", Priority: " << task.priority << endl;
-                }
+            }
         }
         cout << "--------------------------------------------------" << endl;
         cout << "Press 1 to add New Task" << endl;
@@ -296,7 +290,8 @@ int main() {
         cout << "Press 3 to show Missed Tasks" << endl;
         cout << "Press 4 to Get A Summary of Your To-Do List" << endl;
         cout << "Press 5 to Display All Tasks" << endl;
-        cout << "Press 6 to Exit from program" << endl;
+        cout << "Press 6 to Remove a Task" << endl;
+        cout << "Press 7 to Exit from program" << endl;
 
         cout << "Enter your choice: ";
 
@@ -350,7 +345,16 @@ int main() {
                 taskManager.displayTasks();
                 break;
 
-            case 6:
+            case 6: {
+                taskManager.displayTasks();
+                cout << "Enter the index of the task to remove: ";
+                int index;
+                cin >> index;
+                taskManager.removeTask(index);
+                break;
+            }
+
+            case 7:
                 cout << "Exiting..." << endl;
                 return 0;
 
