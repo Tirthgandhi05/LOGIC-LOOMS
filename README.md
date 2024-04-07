@@ -9,7 +9,8 @@
 <h3> Task Manager is designed to simplify our daily routine by providing a To-Do list where the users can enter their daily tasks which relives them from the daily need of remembering all tasks for that particular day which also they do not need to be concerned about forgetting any of them. Along with this, Task-Manager is also equipped with a variety of features which the user can access from the below given feature list. Key Features include </h3>
 <h3> 1. Reminder functionality </h3>
 <h3> 2. Task Status </h3>
-<h3> 3. Task can now be saved to an Excel Document </h3>
+<h3> 3. Task can now be saved to an Excel Document and viewed in coloured tags for efficient viewing.
+</h3>
 
 
 
@@ -24,6 +25,10 @@
 <h3> 4. Bhaumik Luhar </h3>
 
 ---
+
+## Documentation Link : 
+
+[Documentation](https://docs.google.com/document/d/1uTugOLC1n2AZ11VhJafYfFYwI5YcjpyuPw0K-qmCxEc/edit?usp=sharing)
 
 ## Features Offered: 
 
@@ -54,7 +59,10 @@
   - [Nakul Patel](https://github.com/thenakulpatel)
   - [Tirth K Gandhi](https://github.com/Tirthgandhi05)
   - [Bhaumik Luhar](https://github.com/BhaumikLuhar)
- 
+
+ ## Note: 
+  The code works with animation such as typing animation and delay in program functions. If error comes in your device try changing your compiler or using some online compiler if needed. The code is tested and runs with its animation as shown above.
+  
   <p align="right"> 
   <img src="LogicLoomsLogo(1).png" alt="Logic Looms Logo" width="200" height="200">
 </p>
