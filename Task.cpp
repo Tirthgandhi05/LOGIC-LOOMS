@@ -441,7 +441,7 @@ int main()
             for (const auto &task : reminders)
             {
                 cout << "\u001b[1m\u001b[33mName\u001b[0m: " << task.name << ", \u001b[1m\u001b[33mDescription\u001b[0m: " << task.description << ", \u001b[1m\u001b[33mDeadline\u001b[0m: " << task.deadline << ", \u001b[1m\u001b[33mPriority\u001b[0m: " << task.priority << endl;
-                // cout << "Name: " << task.name << ", Description: " << task.description << ", Deadline: " << task.deadline << ", Priority: " << task.priority << endl;
+                
 
             }
         }
