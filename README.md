@@ -18,7 +18,7 @@
 
 ## Group Members:
 
-<h3> 1. Tirth Gandhi </h3>
+<h3> 1. Tirth K Gandhi </h3>
 <h3> 2. Sheel Shah </h3>
 <h3> 3. Nakul Patel </h3>
 <h3> 4. Bhaumik Luhar </h3>
@@ -52,7 +52,7 @@
 
   - [Sheel Shah](https://github.com/Sheel9305)
   - [Nakul Patel](https://github.com/thenakulpatel)
-  - [Tirth Patel](https://github.com/Tirthgandhi05)
+  - [Tirth K Gandhi](https://github.com/Tirthgandhi05)
   - [Bhaumik Luhar](https://github.com/BhaumikLuhar)
  
   <p align="right"> 
