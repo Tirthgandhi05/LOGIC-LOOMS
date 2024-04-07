@@ -30,6 +30,20 @@
 
 [Documentation](https://docs.google.com/document/d/1uTugOLC1n2AZ11VhJafYfFYwI5YcjpyuPw0K-qmCxEc/edit?usp=sharing)
 
+## Contribution :
+- ## Sheel Shah :-
+  Added other important functionalities, some major functionalities, compiled the main base code and looked after complete readme file 
+  and new functionalities code.(major backend work) 
+- ## Tirth Gandhi :-
+  Basic Functionalities.Looking after the errors and efficiently compiling the code and connecting to CSV files. Added some major 
+  functionalities and looked after the repo.(major backend work) 
+- ## Nakul Patel :-
+  Looked after the color coding and look of code output like designs and also compiled the reminder function in the program.(Major 
+  frontend work)
+- ## Bhaumik Luhar :-
+  Compiled the animations of the terminal like typing lag, clear screen etcetera and also infused deadline and its uses to the program. 
+  (Major Frontend Work)
+
 ## Features Offered: 
 
 - ## *Add Task:*
