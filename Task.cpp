@@ -10,6 +10,7 @@
 #include <chrono>
 #include <ctime>
 #include <cstdlib>
+#include <bits/stdc++.h>
 
 
 #ifdef _WIN32
@@ -68,14 +69,24 @@ public:
         loadFromCSV(); 
     }
 
-    void addTask(const string& name, const string& description, const string& deadline, int priority) {
+    void addTask(const string &name, const string &description, const string &deadline, int priority)
+    {
+        regex deadlineRegex("([01]?[0-9]|2[0-3]):[0-5][0-9]");
+        if (!regex_match(deadline, deadlineRegex))
+        {
+            cerr << "Invalid deadline format. Please use the format 'hh:mm'." << endl;
+            return;
+        }
+
         Task task(name, description, deadline, priority);
         pq.push(task);
-        saveToCSV(); 
+        saveToCSV(task);
     }
 
-    void processTask(int index) {
-        if (index < 1 || index > pq.size()) {
+    void processTask(int index)
+    {
+        if (index < 1 || index > pq.size())
+        {
             cerr << "Invalid task index." << endl;
             return;
         }
@@ -83,14 +94,20 @@ public:
         priority_queue<Task> tempQueue;
         int i = 1;
         auto currentTime = system_clock::to_time_t(system_clock::now());
-        while (!pq.empty()) {
+        while (!pq.empty())
+        {
             Task task = pq.top();
             pq.pop();
-            if (i == index) {
-                if (task.status != "Done" && task.status != "Late Done") {
-                    if (currentTime > parseDeadline(task.deadline)) {
+            if (i == index)
+            {
+                if (task.status != "Done" && task.status != "Late Done")
+                {
+                    if (currentTime > parseDeadline(task.deadline))
+                    {
                         task.status = "Late Done";
-                    } else {
+                    }
+                    else
+                    {
                         task.status = "Done";
                     }
                 }
@@ -100,7 +117,7 @@ public:
         }
 
         pq = tempQueue;
-        saveToCSV(); 
+        saveToCSV();
     }
 
     void showMissedTasks() const {
@@ -200,6 +217,40 @@ public:
         saveToCSV(); 
     }
 
+    void modifyDeadline(int index, const string &newDeadline)
+    {
+        if (index < 1 || index > pq.size())
+        {
+            cerr << "Invalid task index." << endl;
+            return;
+        }
+
+        regex deadlineRegex("([01]?[0-9]|2[0-3]):[0-5][0-9]");
+        if (!regex_match(newDeadline, deadlineRegex))
+        {
+            cerr << "Invalid deadline format. Please use the format 'hh:mm'." << endl;
+            return;
+        }
+
+        priority_queue<Task> tempQueue;
+        int i = 1;
+        while (!pq.empty())
+        {
+            Task task = pq.top();
+            pq.pop();
+            if (i == index)
+            {
+                task.deadline = newDeadline;
+            }
+            tempQueue.push(task);
+            ++i;
+        }
+
+        pq = tempQueue;
+        saveToCSV();
+    }
+
+
 private:
     void loadFromCSV() {
     ifstream file(filename);
@@ -250,6 +301,28 @@ private:
 
     file.close();
 }
+
+ void saveToCSV(const Task &task)
+    {
+        ofstream file(filename, ios::app);
+        if (!file.is_open())
+        {
+            cerr << "Error: Unable to open file for writing." << endl;
+            return;
+        }
+
+        file.seekp(0, ios::end);
+        if (file.tellp() == 0)
+        {
+
+            file << "Task Name,Description,Deadline,Priority,Status\n";
+        }
+
+        file << task.name << "," << task.description << "," << task.deadline << ","
+             << task.priority << "," << task.status << "\n";
+
+        file.close();
+    }
 
     void saveToCSV() {
         ofstream file(filename, ios::trunc);
@@ -329,14 +402,22 @@ int main() {
         cout << "Press 3 to show Missed Tasks" << endl;
         cout << "Press 4 to Get A Summary of Your To-Do List" << endl;
         cout << "Press 5 to Display All Tasks" << endl;
-        cout << "Press 6 to Remove a Task" << endl;
-        cout << "Press 7 to Exit from program" << endl;
+        cout << "Press 6 to Modify Deadline of a Task" << endl;
+        cout << "Press 7 to Remove a Task" << endl;
+        cout << "Press 8 to Exit from program" << endl;
 
         cout << "Enter your choice: ";
 
         int choice;
-        cin >> choice;
-        cin.ignore();
+        while (!(cin >> choice))
+        {
+            cout << "Invalid input. Please enter a valid integer." << endl;
+
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Enter your choice: ";
+        }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         clearScreen();
 
@@ -357,7 +438,14 @@ int main() {
                     getline(cin, deadline);
                     cout << "Enter Task Priority: ";
                     int priority;
-                    cin >> priority;
+                while (!(cin >> priority))
+                {
+                    cout << "Invalid input. Please enter a valid integer." << endl;
+
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Enter your priority: ";
+                }
                     cin.ignore(); 
                     
                     taskManager.addTask(name, description, deadline, priority);
@@ -370,7 +458,15 @@ int main() {
                 taskManager.displayTasks();
                 typeText("Enter the index of the task to process: ");
                 int index;
-                cin >> index;
+                while (!(cin >> index))
+            {
+                cout << "Invalid input. Please enter a valid integer." << endl;
+
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Enter your index: ";
+            }
+            cin.ignore();
                 taskManager.processTask(index);
                 cout << "Task processed." << endl;
                 break;
@@ -388,7 +484,21 @@ int main() {
                 taskManager.displayTasks();
                 break;
 
-            case 6: {
+            case 6:
+        {
+            taskManager.displayTasks();
+            typeText("Enter the index of the task to modify deadline: ");
+            int index;
+            cin >> index;
+            cin.ignore();
+            typeText("Enter the new deadline (hh:mm): ");
+            string newDeadline;
+            getline(cin, newDeadline);
+            taskManager.modifyDeadline(index, newDeadline);
+            break;
+        }
+
+            case 7: {
                 taskManager.displayTasks();
                 typeText("Enter the index of the task to remove: ");
                 int index;
@@ -398,7 +508,7 @@ int main() {
                 break;
             }
 
-            case 7:
+            case 8:
                 typeText("Exiting...");cout << endl;
                 typeText("Thank you for using our programm");cout<<endl;
                 return 0;
