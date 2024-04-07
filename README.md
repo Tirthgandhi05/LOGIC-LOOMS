@@ -3,8 +3,16 @@
 
 ### This is our Project for IT205 Course of our College where we as a group have tried developing a task manager program using C++ and appropriate data structures learnt in the course
 
-## Brief Introduction
-Our Task Manager Application is designed to speed up your task management process, enhance productivity, and offers greater flexibility with the ability to export tasks to Excel. Whether you’re managing multiple work projects or maintaining a To-Do list, our Task Manager Application is here to simplify your life.
+# Brief Introduction
+# 🌟 Task Manager- A console based program developed by Logic Looms. 🌟
+
+<h3> Task Manager is designed to simplify our daily routine by providing a To-Do list where the users can enter their daily tasks which relives them from the daily need of remembering all tasks for that particular day which also they do not need to be concerned about forgetting any of them. Along with this, Task-Manager is also equipped with a variety of features which the user can access from the below given feature list. Key Features include </h3>
+<h3> 1. Reminder functionality </h3>
+<h3> 2. Task Status </h3>
+<h3> 3. Task can now be saved to an Excel Document </h3>
+
+
+
 
 ---
 
@@ -17,20 +25,24 @@ Our Task Manager Application is designed to speed up your task management proces
 
 ---
 
-## Function List
+## Features Offered: 
 
 - ## *Add Task:*
-  Users can easily add new tasks. Each task entry allows for a detailed description to ensure you capture all the necessary information for successful completion.
+  Users can easily add new tasks. Each task entry allows for a detailed description required for the successful completion of the Task.
 - ## *Complete Task:*
-  As tasks are completed, users can mark them as done. This provides a sense of accomplishment and helps track progress.
-- ## *Display Pending Tasks:*
-  The application provides a comprehensive view of all pending tasks. This helps users prioritize their work and manage their time effectively.
+  On completing the task, task status will be updated to "DONE". This helps the users to track their progress and provides them with a sense of satisfaction on the completion of the task.
+- ## *Display All Tasks:*
+  Users can now view a list of all the tasks with the provided features.
+- ## *Update Deadline:*
+  Deadline for the task can be updated in case user has to prepone or postpone task completion
 - ## *Show Missing Tasks:*
   Users can also view the tasks that they might have missed. They can also complete these tasks with a label "Late Submission".
 - ## *Remove Task:*
-  Tasks can be deleted with a simple click, allowing users to maintain a clutter-free task list.
+  Users can delete the task(s) with a single click if the task has been wrongly entered or is no longer required.
+  ## *Reminder:*
+  Users will get a reminder for the tasks which are within 1 hour from the deadline.        | 
 - ## *Task Advisor:*
   Users can hereby use our AI to get a suggestion of which task he/she should first do based on his/her upcoming deadlines.
 - ## *Save Tasks To Excel File:*
-  Users can now save their tasks in an Excel file. This feature allows for advanced data manipulation, sharing, and offline access.
+  Users can now save their tasks in an Excel file. This feature allows the users to view the tasks in  structured form. Hereby , the users can easily share the data and are granted offline access.
 
