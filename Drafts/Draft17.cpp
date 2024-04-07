@@ -25,7 +25,6 @@ class TaskManager
 {
 private:
     priority_queue<Task> pq;
-    int maxTasks;
     string filename;
     bool headerWritten;
 
@@ -37,13 +36,6 @@ public:
 
     void addTask(const string &name, const string &description, const string &deadline, int priority)
     {
-        if (pq.size() >= maxTasks)
-        {
-            cerr << "Maximum number of tasks reached. Cannot add more tasks." << endl;
-            return;
-        }
-
-        // Validate the format of the deadline
         regex deadlineRegex("([01]?[0-9]|2[0-3]):[0-5][0-9]");
         if (!regex_match(deadline, deadlineRegex))
         {
@@ -213,7 +205,6 @@ public:
             return;
         }
 
-        // Validate the format of the new deadline
         regex deadlineRegex("([01]?[0-9]|2[0-3]):[0-5][0-9]");
         if (!regex_match(newDeadline, deadlineRegex))
         {
@@ -249,14 +240,13 @@ private:
             return;
         }
 
-        // Check if the file is empty
         file.seekg(0, ios::end);
         if (file.tellg() == 0)
         {
             file.close();
-            return; // File is empty, no need to load tasks, just return
+            return;
         }
-        file.seekg(0, ios::beg); // Reset file pointer if not empty
+        file.seekg(0, ios::beg); 
 
         string line;
         getline(file, line);

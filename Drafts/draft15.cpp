@@ -6,10 +6,11 @@
 #include <queue>
 #include <algorithm>
 #include <iomanip>
-#include <chrono>
 #include <thread>
+#include <chrono>
 #include <ctime>
 #include <cstdlib>
+
 
 #ifdef _WIN32
 #include <windows.h>
@@ -32,7 +33,6 @@ void setColor(int color) {
     cout << "\033[" << color << "m";
 #endif
 }
-
 
 void typeText(const string& text) {
     for (char c : text) {
